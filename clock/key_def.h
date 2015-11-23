@@ -1,12 +1,14 @@
 #ifndef _KEY_DEF_H_
 #define _KEY_DEF_H_
 
-#define KEY_OFF (0)
-#define KEY_ON  (1)
+enum {
+	KEY_OFF,
+	KEY_ON
+};
 
-extern int Key1State;
-extern int Key2State;
-extern int Key3State;
-extern int Key4State;
+extern _SINT Key1State;
+extern _SINT Key2State;
+extern _SINT Key3State;
+extern _SINT Key4State;
 
 #endif

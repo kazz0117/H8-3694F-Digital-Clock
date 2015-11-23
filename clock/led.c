@@ -34,14 +34,13 @@ const _UBYTE Font[12][7] = {	{ 1, 1, 1, 1, 1, 1, 0},		// 0
 
 // グローバル変数
 T_LED_INFO gLedInfo[DIGITS_NUM];
-extern int gLedLightingEnable;
+extern _SINT gLedLightingEnable;
 
 // プロトタイプ宣言
-void DispDigit(void);
-void SetSegments(int digit);
-void LedOff(void);
+static void SetSegments(_SINT digit);
+static void LedOff(void);
 
-int CurrentDigitState;
+_SINT CurrentDigitState;
 
 /////////////////////////////
 // 7セグメントLED表示開始  //
@@ -162,7 +161,7 @@ void DispDigit(void)
 ///////////////////////////
 // 7セグメントLED設定    //
 ///////////////////////////
-void SetSegments(int digit)
+void SetSegments(_SINT digit)
 {
 	PORT8->DATAR.BIT.P80 = Font[gLedInfo[digit].value][0];	// segment 'a'
 	PORT8->DATAR.BIT.P81 = Font[gLedInfo[digit].value][1];	// segment 'b'

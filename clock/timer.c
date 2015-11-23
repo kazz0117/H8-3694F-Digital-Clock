@@ -11,26 +11,23 @@ extern T_TIME gCurrentTime;
 
 // ワンショットタイマー情報
 typedef struct {
-				_UBYTE state;	// これが0のときほかのメンバの値は無意味!!
-				#define STATE_TIMER_UNUSED  (0)
-				#define STATE_TIMER_RUNNING (1)
-				_UDWORD time_set;	// 設定時間(ms)
-				_UDWORD time_remaining;	// 残り時間(ms)
-				void (*func)();	// タイムアウト時に呼ぶコールバック関数
+	_UBYTE state;	// これが0のときほかのメンバの値は無意味!!
+	#define STATE_TIMER_UNUSED  (0)
+	#define STATE_TIMER_RUNNING (1)
+	_UDWORD time_set;	// 設定時間(ms)
+	_UDWORD time_remaining;	// 残り時間(ms)
+	void (*func)();	// タイムアウト時に呼ぶコールバック関数
 } T_TIMER_INFO;
 
 // グローバル変数
 T_TIMER_INFO TimerInfo[TIMER_INFO_NUM];
-int gBeepOn = 0;
-int gLedLightingEnable;
+_SINT gBeepOn = 0;
+_SINT gLedLightingEnable;
 
 // プロトタイプ宣言
-void ManageTimer(void);
-int SetTimer(_UDWORD time, void *func);
-void BeepOn(_UDWORD time);
-void BeepOff(void);
-void CheckAlarmingTime(T_TIME *time);
-void StopAlarm(void);
+static void ManageTimer(void);
+static void CheckAlarmingTime(T_TIME *time);
+static void StopAlarm(void);
 
 ///////////////////////////
 // タイマーＡ初期化      //
@@ -48,13 +45,14 @@ void InitTimerA(void)
 ////////////////////////////////
 void TimerA_IH(void)
 {
-static int count;
-static int flg_LED;
+static _SINT count;
+static _SINT flg_LED;
 
 #define CORRECTION_ENABLE  (1)
 #define CORRECTION_DISABLE (0)
 
-static int SecondCorrection = CORRECTION_ENABLE;
+static _SINT SecondCorrection = CORRECTION_ENABLE;
+
 	set_imask_ccr((_UBYTE)1);	// 割り込み禁止
 
 	INTERRUPT->IRR1.BIT.IRRTA = 0;
@@ -115,7 +113,7 @@ static int SecondCorrection = CORRECTION_ENABLE;
 ///////////////////////////
 void InitTimerV(void)
 {
-int i;
+_SINT i;
 	TIMERV->TCRV0.BIT.CKS = 0x03;	// 内部クロックφ/128でカウント
 									// CLOCK=20MHzなら156250Hzになる。
 	TIMERV->TCRV1.BIT.ICKS0 = 1;	//
@@ -136,7 +134,7 @@ int i;
 ////////////////////////////////
 void TimerV_IH(void)
 {
-static int flg_beep;
+static _SINT flg_beep;
 
 	TIMERV->TCSRV.BIT.CMFA = 0;	// 割り込み要因をクリア
 
@@ -156,9 +154,9 @@ static int flg_beep;
 ////////////////////////////////
 // ワンショットタイマー減算   //
 ////////////////////////////////
-void ManageTimer(void)
+static void ManageTimer(void)
 {
-int i;
+_SINT i;
 
 	for(i = 0; i < TIMER_INFO_NUM; i++) {
 		// 動作中のタイマーを見つけたら(残り時間減算で結果が0のタイマーはダメ)
@@ -179,9 +177,9 @@ int i;
 ////////////////////////////////
 // ワンショットタイマーセット //
 ////////////////////////////////
-int SetTimer(_UDWORD time, void *func)
+_SINT SetTimer(_UDWORD time, void *func)
 {
-int i;
+_SINT i;
 	if(time != 0 && func != NULL) {
 		// 空いてるタイマをさがす…
 		for(i = 0; i < TIMER_INFO_NUM; i++) {
@@ -193,23 +191,18 @@ int i;
 				TimerInfo[i].func = (void *)func;
 
 				return i;	// タイマーID
-			}
-			
-		}
-		
-		return SYS_TIMER_FULL;
-	
+			}			
+		}		
+		return SYS_TIMER_FULL;	
 	} else {
-		
 		return SYS_ERROR;
-
 	}
 }
 
 ////////////////////////////////
 // タイマーキャンセル         //
 ////////////////////////////////
-int KillTimer(int timer_id)
+_SINT KillTimer(_SINT timer_id)
 {
 	if(TimerInfo[timer_id].state = STATE_TIMER_RUNNING){
 		TimerInfo[timer_id].state = STATE_TIMER_UNUSED;
@@ -239,7 +232,7 @@ void BeepOff(void)
 ////////////////////////////////
 // 指定時刻にアラーム鳴動     //
 ////////////////////////////////
-void CheckAlarmingTime(T_TIME *time)
+static void CheckAlarmingTime(T_TIME *time)
 {
 	if((time->hh ==  8 && time->mm == 55 && time->ss == 0) ||
 	   (time->hh == 10 && time->mm == 30 && time->ss == 0) ||
@@ -260,7 +253,7 @@ void CheckAlarmingTime(T_TIME *time)
 ////////////////////////////////
 // アラーム鳴動停止           //
 ////////////////////////////////
-void StopAlarm(void)
+static void StopAlarm(void)
 {
 	PORT1->DATAR.BIT.P15 = 1;
 }

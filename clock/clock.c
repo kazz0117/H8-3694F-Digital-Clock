@@ -46,41 +46,32 @@ volatile T_TIMV *TIMERV    = (T_TIMV *)0xffa0; 	// タイマＶ
 volatile T_INT  *INTERRUPT = (T_INT  *)0xfff2;	// 割り込み
 
 T_TIME gCurrentTime;	// 現在時刻
-int ClockMode = MODE_ADJUSTING;	// 	現在の時計モード
-int AdjustmentState = ADJUSTING_INIT;	// 時刻設定の状態
+_SINT ClockMode = MODE_ADJUSTING;	// 	現在の時計モード
+_SINT AdjustmentState = ADJUSTING_INIT;	// 時刻設定の状態
 
 extern T_LED_INFO gLedInfo[DIGITS_NUM];
 
 // プロトタイプ宣言
-void InitPort(void);
-void InitCurrentTime(void);
-void DisplayCurrentTime(void);
-void AdjustTime(void);
-void Wait(_UDWORD time);
-void TimeAdjustmentInit(T_TIME *time);
-void TimeAdjustmentHour(T_TIME *time);
-void TimeAdjustmentMinute(T_TIME *time);
-void TimeAdjustmentSecond(T_TIME *time);
+static void Init(void);
+static void InitPort(void);
+static void InitCurrentTime(void);
+static void DisplayCurrentTime(void);
+static void AdjustTime(void);
+static void Wait(_UDWORD time);
+static void TimeAdjustmentInit(T_TIME *time);
+static void TimeAdjustmentHour(T_TIME *time);
+static void TimeAdjustmentMinute(T_TIME *time);
+static void TimeAdjustmentSecond(T_TIME *time);
 
 ///////////////////////////
 // メイン                //
 ///////////////////////////
 void main(void)
 {
-
 	// システム起動時初期化
 	set_imask_ccr((_UBYTE)1);	// 割り込み禁止
 
-	InitPort();
-	InitTimerA();
-	InitTimerV();
-	InitCurrentTime();
-	
-	INTERRUPT->IRR1.BIT.IRRTA = 0;	
-	INTERRUPT->IENR1.BIT.IENTA = 1;	// タイマーＡ割り込み要求有効化
-
-	TIMERV->TCSRV.BIT.CMFA = 0;	// タイマーＶコンペアマッチＡ(割り込み要因？)クリア
-	TIMERV->TCRV0.BIT.CMIEA = 1;	// タイマーＶ割り込み要求
+	Init();
 
 	set_imask_ccr((_UBYTE)0);	// 割り込み許可
 
@@ -90,7 +81,6 @@ void main(void)
 	// キースキャンタスク起動
 	ScanKeys();
 
-	
 	for(;;) {
 
 		switch(ClockMode) {
@@ -110,16 +100,33 @@ void main(void)
 }
 
 ///////////////////////////
+// 初期化                //
+///////////////////////////
+static void Init(void)
+{
+	InitPort();
+	InitTimerA();
+	InitTimerV();
+	InitCurrentTime();
+	
+	INTERRUPT->IRR1.BIT.IRRTA = 0;	
+	INTERRUPT->IENR1.BIT.IENTA = 1;	// タイマーＡ割り込み要求有効化
+
+	TIMERV->TCSRV.BIT.CMFA = 0;	// タイマーＶコンペアマッチＡ(割り込み要因？)クリア
+	TIMERV->TCRV0.BIT.CMIEA = 1;	// タイマーＶ割り込み要求	
+}
+
+///////////////////////////
 // 入出力ポート初期化    //
 ///////////////////////////
-void InitPort(void)
+static void InitPort(void)
 {
 	// ポート１
 	PORT1->CTRLR.BIT.PCR11 = 1;	// コロン(アノード) 出力
 	PORT1->CTRLR.BIT.PCR12 = 1;	// コロン(カソード) 出力
 	PORT1->CTRLR.BIT.PCR14 = 1;	// beep 出力
 	PORT1->CTRLR.BIT.PCR15 = 1;	// アラーム制御 出力
-	PORT1->DATAR.BIT.P15 = 1;	// アラーム非鳴動(負論理)
+	PORT1->DATAR.BIT.P15   = 1;	// アラーム非鳴動(負論理)
 	
 	// ポート５
 	PORT5->CTRLR.BIT.PCR50 = 1;	// 7セグdigit1 出力
@@ -143,7 +150,7 @@ void InitPort(void)
 ///////////////////////////
 // 現在時刻初期化        //
 ///////////////////////////
-void InitCurrentTime(void)
+static void InitCurrentTime(void)
 {
 	gCurrentTime.hh = 0;	// 時
 	gCurrentTime.mm = 0;	// 分
@@ -153,7 +160,7 @@ void InitCurrentTime(void)
 ///////////////////////////
 // 現在時刻表示          //
 ///////////////////////////
-void DisplayCurrentTime(void) {
+static void DisplayCurrentTime(void) {
 	gLedInfo[DIGIT2].value = gCurrentTime.ss / 10;
 	gLedInfo[DIGIT1].value = gCurrentTime.ss % 10;
 	gLedInfo[DIGIT4].value = gCurrentTime.mm / 10;
@@ -174,7 +181,7 @@ void DisplayCurrentTime(void) {
 ///////////////////////////
 // 時刻設定              //
 ///////////////////////////
-void AdjustTime(void) {
+static void AdjustTime(void) {
 static T_TIME AdjustingTime;
 	
 	switch(AdjustmentState) {
@@ -204,10 +211,10 @@ static T_TIME AdjustingTime;
 //////////////////////////////
 // 指定時間何もしないで待つ //
 //////////////////////////////
-void Wait(_UDWORD time)
+static void Wait(_UDWORD time)
 {
 _UDWORD i;
-volatile int a;
+volatile _SINT a;
 	for(i = 0; i < time; i++) {
 		a += i;
 	}
@@ -216,7 +223,7 @@ volatile int a;
 ///////////////////////////
 // 時刻設定初期処理      //
 ///////////////////////////
-void TimeAdjustmentInit(T_TIME *time)
+static void TimeAdjustmentInit(T_TIME *time)
 {
 	// 現在時刻をもってくる
 	time->hh = gCurrentTime.hh;
@@ -236,7 +243,7 @@ void TimeAdjustmentInit(T_TIME *time)
 ///////////////////////////
 // 「時」設定            //
 ///////////////////////////
-void TimeAdjustmentHour(T_TIME *time)
+static void TimeAdjustmentHour(T_TIME *time)
 {
 	// 表示
 	gLedInfo[DIGIT6].value = time->hh / 10; gLedInfo[DIGIT6].state = STATE_LED_BLINK;
@@ -278,7 +285,7 @@ void TimeAdjustmentHour(T_TIME *time)
 ///////////////////////////
 // 「分」設定            //
 ///////////////////////////
-void TimeAdjustmentMinute(T_TIME *time)
+static void TimeAdjustmentMinute(T_TIME *time)
 {
 	// 表示
 	gLedInfo[DIGIT4].value = time->mm / 10; gLedInfo[DIGIT4].state = STATE_LED_BLINK;
@@ -320,7 +327,7 @@ void TimeAdjustmentMinute(T_TIME *time)
 ///////////////////////////
 // 「秒」設定            //
 ///////////////////////////
-void TimeAdjustmentSecond(T_TIME *time)
+static void TimeAdjustmentSecond(T_TIME *time)
 {
 	// 表示
 	gLedInfo[DIGIT2].value = time->ss / 10; gLedInfo[DIGIT2].state = STATE_LED_BLINK;

@@ -7,18 +7,18 @@
 #define KEY_WAIT (150)
 
 // ƒOƒ[ƒoƒ‹•Ï”
-int Key1State = KEY_OFF;
-int Key2State = KEY_OFF;
-int Key3State = KEY_OFF;
-int Key4State = KEY_OFF;
+_SINT Key1State = KEY_OFF;
+_SINT Key2State = KEY_OFF;
+_SINT Key3State = KEY_OFF;
+_SINT Key4State = KEY_OFF;
 
 void ScanKeys(void)
 {
-static int Key1Count = 0;
-static int Key2Count = 0;
-static int Key3Count = 0;
-static int Key4Count = 0;
-static int KeyWaitCount = 0;
+static _SINT Key1Count = 0;
+static _SINT Key2Count = 0;
+static _SINT Key3Count = 0;
+static _SINT Key4Count = 0;
+static _SINT KeyWaitCount = 0;
 
 	if(KeyWaitCount >= 1) {
 		KeyWaitCount--;

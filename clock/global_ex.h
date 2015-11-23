@@ -15,4 +15,10 @@ extern T_TIMA *TIMERA;	// タイマＡアクセスポインタ
 extern T_TIMV *TIMERV;	// タイマＶ
 extern T_INT  *INTERRUPT;	// 割り込み
 
+
+extern void DispDigit(void);
+extern _SINT SetTimer(_UDWORD time, void *func);
+extern void BeepOn(_UDWORD time);
+extern void BeepOff(void);
+
 #endif

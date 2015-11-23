@@ -1,5 +1,5 @@
 typedef struct {
-	int ss;	// •b
-	int mm;	// •ª
-	int hh;	// Žž
+	_SINT ss;	// •b
+	_SINT mm;	// •ª
+	_SINT hh;	// Žž
 } T_TIME;
