@@ -54,7 +54,7 @@ void StartLed(void)
 ///////////////////////////
 // 7セグメントLED表示    //
 ///////////////////////////
-void DispDigit(void)
+static void DispDigit(void)
 {
 	SetTimer(LED_LIGHTING_DURATION, DispDigit);
 
@@ -161,7 +161,7 @@ void DispDigit(void)
 ///////////////////////////
 // 7セグメントLED設定    //
 ///////////////////////////
-void SetSegments(_SINT digit)
+static void SetSegments(_SINT digit)
 {
 	PORT8->DATAR.BIT.P80 = Font[gLedInfo[digit].value][0];	// segment 'a'
 	PORT8->DATAR.BIT.P81 = Font[gLedInfo[digit].value][1];	// segment 'b'
@@ -188,7 +188,7 @@ void InitDigitsValues(void)
 ///////////////////////////
 // 7セグメントLED全消灯  //
 ///////////////////////////
-void LedOff(void)
+static void LedOff(void)
 {
 	PORT8->DATAR.BIT.P80 = 0;
 	PORT8->DATAR.BIT.P81 = 0;
