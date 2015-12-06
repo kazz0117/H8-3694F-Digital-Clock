@@ -1,3 +1,8 @@
+This project is a digital clock on H8/3694F micro controller. Written in C language. The diagram attached.
+
+
+
+
 # LED-Displaay-Digital-Clock-Using-H8-3694F
 Written with C
 
