@@ -1,4 +1,5 @@
 This project is a digital clock on H8/3694F micro controller. Written in C language. The diagram attached.
+H8/3694Fマイクロコントローラー用に書いたデジタル時計プログラムです。C言語で書かれています。回路図添付しています。
 
 
 
